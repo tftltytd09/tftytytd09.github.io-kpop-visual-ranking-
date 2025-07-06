@@ -22,9 +22,22 @@
       margin: 2rem 0;
     }
     button {
-      padding: 1rem 2rem;
+      padding: 1rem;
       font-size: 1rem;
       cursor: pointer;
+      width: 200px;
+      border: none;
+      background: none;
+    }
+    button img {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    button div {
+      margin-top: 0.5rem;
+      font-weight: bold;
+      text-align: center;
     }
     .results {
       margin-top: 2rem;
@@ -32,7 +45,7 @@
   </style>
 </head>
 <body>
-  <h1>K-Pop 外貌喜好排名</h1>
+  <h1>K-Pop 外貌喜好排名（測試版）</h1>
   <div id="app">
     <div class="pair">
       <button id="leftBtn"></button>
@@ -45,15 +58,17 @@
   </div>
 
   <script>
-    const members = [
-      // SEVENTEEN
-      "S.Coups", "Jeonghan", "Joshua", "Jun", "Hoshi", "Wonwoo", "Woozi",
-      "DK", "Mingyu", "The8", "Seungkwan", "Vernon", "Dino",
-      // Stray Kids
-      "Bang Chan", "Lee Know", "Changbin", "Hyunjin", "Han", "Felix", "Seungmin", "I.N",
-      // ATEEZ
-      "Hongjoong", "Seonghwa", "Yunho", "Yeosang", "San", "Mingi", "Wooyoung", "Jongho"
-    ];
+    const members = ["Felix", "Hyunjin"];
+
+    const photos = {
+      "Felix": "https://i.pinimg.com/736x/62/bc/e2/62bce28207f0136bcd8acb792f2e0af6.jpg",
+      "Hyunjin": "https://i.pinimg.com/736x/bd/7d/1b/bd7d1bb99f140c8c168c55b13839274d.jpg"
+    };
+
+    const displayNames = {
+      "Felix": "李龍馥（Felix）",
+      "Hyunjin": "黃鉉辰（Hyunjin）"
+    };
 
     const scores = Object.fromEntries(members.map(name => [name, 1000]));
 
@@ -73,13 +88,13 @@
     }
 
     function updateButtons() {
-      leftBtn.textContent = left;
-      rightBtn.textContent = right;
+      leftBtn.innerHTML = `<img src="${photos[left]}" alt="${left}"><div>${displayNames[left]}</div>`;
+      rightBtn.innerHTML = `<img src="${photos[right]}" alt="${right}"><div>${displayNames[right]}</div>`;
     }
 
     function updateRanking() {
       const sorted = [...members].sort((a, b) => scores[b] - scores[a]);
-      rankingEl.innerHTML = sorted.map(name => `<li>${name} (${scores[name].toFixed(0)})</li>`).join("");
+      rankingEl.innerHTML = sorted.map(name => `<li>${displayNames[name]} (${scores[name].toFixed(0)})</li>`).join("");
     }
 
     function adjustScores(winner, loser) {
