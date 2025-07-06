@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>K-Pop 外貌喜好排名（測試版）</title>
+  <title>K-Pop 外貌喜好排名（完整版）</title>
   <style>
     body {
       font-family: sans-serif;
@@ -37,4 +37,161 @@
     button div {
       margin-top: 0.5rem;
       font-weight: bold;
-      text
+      text-align: center;
+    }
+    .results {
+      margin-top: 2rem;
+      max-width: 500px;
+      width: 100%;
+    }
+    ol {
+      padding-left: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>K-Pop 外貌喜好排名（完整版）</h1>
+  <div id="app">
+    <div class="pair">
+      <button id="leftBtn"></button>
+      <button id="rightBtn"></button>
+    </div>
+    <div class="results">
+      <h2>目前排名：</h2>
+      <ol id="ranking"></ol>
+    </div>
+  </div>
+
+  <script>
+    const members = [
+      // Seventeen
+      "S.Coups", "Jeonghan", "Joshua", "Jun", "Hoshi", "Wonwoo", "Woozi", "DK", "Mingyu", "The8", "Seungkwan", "Vernon", "Dino",
+      // Stray Kids
+      "Bang Chan", "Lee Know", "Changbin", "Hyunjin", "Han", "Felix", "Seungmin", "I.N",
+      // ATEEZ
+      "Hongjoong", "Seonghwa", "Yunho", "Yeosang", "San", "Mingi", "Wooyoung", "Jongho"
+    ];
+
+    const displayNames = {
+      // Seventeen
+      "S.Coups": "崔勝哲（S.Coups）",
+      "Jeonghan": "尹淨漢（Jeonghan）",
+      "Joshua": "洪知秀（Joshua）",
+      "Jun": "文俊輝（Jun）",
+      "Hoshi": "權順榮（Hoshi）",
+      "Wonwoo": "全圓佑（Wonwoo）",
+      "Woozi": "李知勳（Woozi）",
+      "DK": "李碩珉（DK）",
+      "Mingyu": "金珉奎（Mingyu）",
+      "The8": "徐明浩（The8）",
+      "Seungkwan": "夫勝寬（Seungkwan）",
+      "Vernon": "崔瀚率（Vernon）",
+      "Dino": "李燦（Dino）",
+      // Stray Kids
+      "Bang Chan": "方燦（Bang Chan）",
+      "Lee Know": "李旻浩（Lee Know）",
+      "Changbin": "徐彰彬（Changbin）",
+      "Hyunjin": "黃鉉辰（Hyunjin）",
+      "Han": "韓知城（Han）",
+      "Felix": "李龍馥（Felix）",
+      "Seungmin": "金昇玟（Seungmin）",
+      "I.N": "梁精寅（I.N）",
+      // ATEEZ
+      "Hongjoong": "金弘中（Hongjoong）",
+      "Seonghwa": "朴星化（Seonghwa）",
+      "Yunho": "丁潤浩（Yunho）",
+      "Yeosang": "姜呂尚（Yeosang）",
+      "San": "崔傘（San）",
+      "Mingi": "宋旼琦（Mingi）",
+      "Wooyoung": "鄭友榮（Wooyoung）",
+      "Jongho": "崔鍾浩（Jongho）"
+    };
+
+    const photos = {
+      // Seventeen
+      "S.Coups": "https://i.imgur.com/Xs67CX9.jpg",
+      "Jeonghan": "https://i.imgur.com/ZvfXJPq.jpg",
+      "Joshua": "https://i.imgur.com/Jjs4aHe.jpg",
+      "Jun": "https://i.imgur.com/7ajb6vR.jpg",
+      "Hoshi": "https://i.imgur.com/6tvbB7C.jpg",
+      "Wonwoo": "https://i.imgur.com/PSR08vG.jpg",
+      "Woozi": "https://i.imgur.com/fjU8Vjh.jpg",
+      "DK": "https://i.imgur.com/ypJ4JgP.jpg",
+      "Mingyu": "https://i.imgur.com/2i9utHe.jpg",
+      "The8": "https://i.imgur.com/yqPeJbw.jpg",
+      "Seungkwan": "https://i.imgur.com/fX1K2d0.jpg",
+      "Vernon": "https://i.imgur.com/g1ZQTXo.jpg",
+      "Dino": "https://i.imgur.com/aFT6Xu3.jpg",
+      // Stray Kids
+      "Bang Chan": "https://i.imgur.com/3WTPJIN.jpg",
+      "Lee Know": "https://i.imgur.com/0tFyIQP.jpg",
+      "Changbin": "https://i.imgur.com/iMDZb5u.jpg",
+      "Hyunjin": "https://i.imgur.com/UsFi5rS.jpg",
+      "Han": "https://i.imgur.com/riDyqPC.jpg",
+      "Felix": "https://i.imgur.com/Yh3gGPH.jpg",
+      "Seungmin": "https://i.imgur.com/ye5NDRc.jpg",
+      "I.N": "https://i.imgur.com/dxRSrXm.jpg",
+      // ATEEZ
+      "Hongjoong": "https://i.imgur.com/cj5oi5x.jpg",
+      "Seonghwa": "https://i.imgur.com/7RhCrv0.jpg",
+      "Yunho": "https://i.imgur.com/ROdOGJ3.jpg",
+      "Yeosang": "https://i.imgur.com/Ui0HbNu.jpg",
+      "San": "https://i.imgur.com/Rq1loz3.jpg",
+      "Mingi": "https://i.imgur.com/09R8bJM.jpg",
+      "Wooyoung": "https://i.imgur.com/Q7Fe8qF.jpg",
+      "Jongho": "https://i.imgur.com/8FIVZOk.jpg"
+    };
+
+    const scores = Object.fromEntries(members.map(name => [name, 1000]));
+
+    let [left, right] = getRandomPair();
+
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
+    const rankingEl = document.getElementById("ranking");
+
+    function getRandomPair() {
+      let a = members[Math.floor(Math.random() * members.length)];
+      let b;
+      do {
+        b = members[Math.floor(Math.random() * members.length)];
+      } while (a === b);
+      return [a, b];
+    }
+
+    function updateButtons() {
+      leftBtn.innerHTML = `<img src="${photos[left]}" alt="${left}"><div>${displayNames[left]}</div>`;
+      rightBtn.innerHTML = `<img src="${photos[right]}" alt="${right}"><div>${displayNames[right]}</div>`;
+    }
+
+    function updateRanking() {
+      const sorted = [...members].sort((a, b) => scores[b] - scores[a]);
+      rankingEl.innerHTML = sorted.map(name => `<li>${displayNames[name]} (${scores[name].toFixed(0)})</li>`).join("");
+    }
+
+    function adjustScores(winner, loser) {
+      const K = 32;
+      const expected = 1 / (1 + Math.pow(10, (scores[loser] - scores[winner]) / 400));
+      scores[winner] += K * (1 - expected);
+      scores[loser] += K * (0 - (1 - expected));
+    }
+
+    leftBtn.onclick = () => {
+      adjustScores(left, right);
+      [left, right] = getRandomPair();
+      updateButtons();
+      updateRanking();
+    };
+
+    rightBtn.onclick = () => {
+      adjustScores(right, left);
+      [left, right] = getRandomPair();
+      updateButtons();
+      updateRanking();
+    };
+
+    updateButtons();
+    updateRanking();
+  </script>
+</body>
+</html>
