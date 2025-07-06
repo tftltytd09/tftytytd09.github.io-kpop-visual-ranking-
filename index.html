@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>K-Pop Visual Ranking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>K-Pop 外貌喜好排名（測試版）</title>
   <style>
     body {
       font-family: sans-serif;
@@ -37,89 +37,4 @@
     button div {
       margin-top: 0.5rem;
       font-weight: bold;
-      text-align: center;
-    }
-    .results {
-      margin-top: 2rem;
-    }
-  </style>
-</head>
-<body>
-  <h1>K-Pop 外貌喜好排名（測試版）</h1>
-  <div id="app">
-    <div class="pair">
-      <button id="leftBtn"></button>
-      <button id="rightBtn"></button>
-    </div>
-    <div class="results">
-      <h2>目前排名：</h2>
-      <ol id="ranking"></ol>
-    </div>
-  </div>
-
-  <script>
-    const members = ["Felix", "Hyunjin"];
-
-    const photos = {
-      "Felix": "https://i.pinimg.com/736x/62/bc/e2/62bce28207f0136bcd8acb792f2e0af6.jpg",
-      "Hyunjin": "https://i.pinimg.com/736x/bd/7d/1b/bd7d1bb99f140c8c168c55b13839274d.jpg"
-    };
-
-    const displayNames = {
-      "Felix": "李龍馥（Felix）",
-      "Hyunjin": "黃鉉辰（Hyunjin）"
-    };
-
-    const scores = Object.fromEntries(members.map(name => [name, 1000]));
-
-    let [left, right] = getRandomPair();
-
-    const leftBtn = document.getElementById("leftBtn");
-    const rightBtn = document.getElementById("rightBtn");
-    const rankingEl = document.getElementById("ranking");
-
-    function getRandomPair() {
-      let a = members[Math.floor(Math.random() * members.length)];
-      let b;
-      do {
-        b = members[Math.floor(Math.random() * members.length)];
-      } while (a === b);
-      return [a, b];
-    }
-
-    function updateButtons() {
-      leftBtn.innerHTML = `<img src="${photos[left]}" alt="${left}"><div>${displayNames[left]}</div>`;
-      rightBtn.innerHTML = `<img src="${photos[right]}" alt="${right}"><div>${displayNames[right]}</div>`;
-    }
-
-    function updateRanking() {
-      const sorted = [...members].sort((a, b) => scores[b] - scores[a]);
-      rankingEl.innerHTML = sorted.map(name => `<li>${displayNames[name]} (${scores[name].toFixed(0)})</li>`).join("");
-    }
-
-    function adjustScores(winner, loser) {
-      const K = 32;
-      const expected = 1 / (1 + Math.pow(10, (scores[loser] - scores[winner]) / 400));
-      scores[winner] += K * (1 - expected);
-      scores[loser] += K * (0 - (1 - expected));
-    }
-
-    leftBtn.onclick = () => {
-      adjustScores(left, right);
-      [left, right] = getRandomPair();
-      updateButtons();
-      updateRanking();
-    };
-
-    rightBtn.onclick = () => {
-      adjustScores(right, left);
-      [left, right] = getRandomPair();
-      updateButtons();
-      updateRanking();
-    };
-
-    updateButtons();
-    updateRanking();
-  </script>
-</body>
-</html>
+      text
