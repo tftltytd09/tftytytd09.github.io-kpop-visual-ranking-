@@ -30,7 +30,9 @@
       background: none;
     }
     button img {
-      width: 100%;
+      width: 200px;
+      height: 260px;
+      object-fit: cover;
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
@@ -42,6 +44,48 @@
     .results {
       margin-top: 2rem;
     }
+    .progress {
+      width: 100%;
+      max-width: 400px;
+      height: 20px;
+      background-color: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: #4caf50;
+      width: 0%;
+    }
+    #statusText {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    #top5 {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    #top5 img {
+      width: 120px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #restartBtn {
+      margin-top: 1.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -51,129 +95,97 @@
       <button id="leftBtn"></button>
       <button id="rightBtn"></button>
     </div>
+    <div class="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div id="statusText">比較進行中...</div>
     <div class="results">
       <h2>目前排名：</h2>
       <ol id="ranking"></ol>
+      <div id="top5"></div>
+      <button id="restartBtn" style="display:none;">重新開始</button>
     </div>
   </div>
 
   <script>
-    const members = [
-      "S.Coups", "Jeonghan", "Joshua", "Jun", "Hoshi", "Wonwoo", "Woozi", "DK", "Mingyu", "The8", "Seungkwan", "Vernon", "Dino",
-      "Bang Chan", "Lee Know", "Changbin", "Hyunjin", "Han", "Felix", "Seungmin", "I.N",
-      "Hongjoong", "Seonghwa", "Yunho", "Yeosang", "San", "Mingi", "Wooyoung", "Jongho"
-    ];
-
-    const displayNames = {
-      "S.Coups": "崔勝哲（S.Coups）",
-      "Jeonghan": "尹淨漢（Jeonghan）",
-      "Joshua": "洪知秀（Joshua）",
-      "Jun": "文俊輝（Jun）",
-      "Hoshi": "權順榮（Hoshi）",
-      "Wonwoo": "全圓佑（Wonwoo）",
-      "Woozi": "李知勳（Woozi）",
-      "DK": "李碩珉（DK）",
-      "Mingyu": "金珉奎（Mingyu）",
-      "The8": "徐明浩（The8）",
-      "Seungkwan": "夫勝寬（Seungkwan）",
-      "Vernon": "崔瀚率（Vernon）",
-      "Dino": "李燦（Dino）",
-      "Bang Chan": "方燦（Bang Chan）",
-      "Lee Know": "李旻浩（Lee Know）",
-      "Changbin": "徐彰彬（Changbin）",
-      "Hyunjin": "黃鉉辰（Hyunjin）",
-      "Han": "韓知城（Han）",
-      "Felix": "李龍馥（Felix）",
-      "Seungmin": "金昇玟（Seungmin）",
-      "I.N": "梁精寅（I.N）",
-      "Hongjoong": "金弘中（Hongjoong）",
-      "Seonghwa": "朴星化（Seonghwa）",
-      "Yunho": "丁潤浩（Yunho）",
-      "Yeosang": "姜呂尚（Yeosang）",
-      "San": "崔傘（San）",
-      "Mingi": "宋旼琦（Mingi）",
-      "Wooyoung": "鄭友榮（Wooyoung）",
-      "Jongho": "崔鍾浩（Jongho）"
-    };
-
-    const photos = {
-      "S.Coups": "https://i.postimg.cc/8kJVT7mt/SVT.jpg",
-      "Jeonghan": "https://i.postimg.cc/h4yqB9mJ/SVT.jpg",
-      "Joshua": "https://i.postimg.cc/zGWmK6cW/SVT.jpg",
-      "Jun": "https://i.postimg.cc/j2FV4bT6/SVT.jpg",
-      "Hoshi": "https://i.postimg.cc/L4Nm8cc8/SVT.jpg",
-      "Wonwoo": "https://i.postimg.cc/RVWxVN1g/SVT.jpg",
-      "Woozi": "https://i.postimg.cc/jdB0WtZt/SVT.jpg",
-      "DK": "https://i.postimg.cc/nV5w2T71/SVT.jpg",
-      "Mingyu": "https://i.postimg.cc/j2W3KJVN/SVT.jpg",
-      "The8": "https://i.postimg.cc/XJ11TkP4/SVT.jpg",
-      "Seungkwan": "https://i.postimg.cc/x8WxdTYZ/SVT.jpg",
-      "Vernon": "https://i.postimg.cc/bdcghC9c/SVT.jpg",
-      "Dino": "https://i.postimg.cc/gkZtTRHb/SVT.jpg",
-      "Bang Chan": "https://i.postimg.cc/kG1CYSQb/SKZ.jpg",
-      "Lee Know": "https://i.postimg.cc/90FVBb72/SKZ.jpg",
-      "Changbin": "https://i.postimg.cc/ydTs9tWn/SKZ.jpg",
-      "Hyunjin": "https://i.postimg.cc/W3jm4FQC/SKZ.jpg",
-      "Han": "https://i.pinimg.com/736x/37/f8/21/37f821cc9253859ec870a1adf08b0118.jpg",
-      "Felix": "https://i.postimg.cc/MTwznqZv/SKZ.jpg",
-      "Seungmin": "https://i.postimg.cc/brzYB84K/SKZ.jpg",
-      "I.N": "https://i.postimg.cc/x8tjrh2q/SKZ-IN.jpg",
-      "Hongjoong": "https://i.postimg.cc/85gzLL4k/ATZ.jpg",
-      "Seonghwa": "https://i.postimg.cc/qRcMwgDs/ATZ.jpg",
-      "Yunho": "https://i.postimg.cc/L87X6cZ1/ATZ.jpg",
-      "Yeosang": "https://i.postimg.cc/GhCvby1C/ATZ.jpg",
-      "San": "https://i.postimg.cc/y69FqTtj/ATZ.jpg",
-      "Mingi": "https://i.postimg.cc/9QXT7HMg/ATZ.jpg",
-      "Wooyoung": "https://i.postimg.cc/4NQVyxJh/ATZ.jpg",
-      "Jongho": "https://i.postimg.cc/PJmZmtY9/ATZ.jpg"
-    };
-
-    const scores = Object.fromEntries(members.map(name => [name, 0]));
-    const comparisons = [];
-    const allPairs = [];
-    for (let i = 0; i < members.length; i++) {
-      for (let j = i + 1; j < members.length; j++) {
-        allPairs.push([members[i], members[j]]);
-      }
-    }
-    shuffle(allPairs);
-
-    function shuffle(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-    }
+    const members = [...]; // 留空，實際部署時會填入
+    const displayNames = {...}; // 留空，實際部署時會填入
+    const photos = {...}; // 留空，實際部署時會填入
 
     const leftBtn = document.getElementById("leftBtn");
     const rightBtn = document.getElementById("rightBtn");
     const rankingEl = document.getElementById("ranking");
+    const progressBar = document.getElementById("progressBar");
+    const statusText = document.getElementById("statusText");
+    const top5Div = document.getElementById("top5");
+    const restartBtn = document.getElementById("restartBtn");
 
-    let currentIndex = 0;
+    let comparisons = 0;
+    const totalComparisons = Math.ceil(members.length * Math.log2(members.length));
 
-    function updateButtons() {
-      if (currentIndex >= allPairs.length) {
-        const sorted = [...members].sort((a, b) => scores[b] - scores[a]);
-        rankingEl.innerHTML = sorted.map(name => `<li>${displayNames[name]}</li>`).join("");
-        document.querySelector(".pair").style.display = "none";
-        return;
+    async function mergeSort(arr) {
+      if (arr.length <= 1) return arr;
+      const mid = Math.floor(arr.length / 2);
+      const left = await mergeSort(arr.slice(0, mid));
+      const right = await mergeSort(arr.slice(mid));
+      return await merge(left, right);
+    }
+
+    async function merge(left, right) {
+      let result = [];
+      let i = 0, j = 0;
+      while (i < left.length && j < right.length) {
+        const l = left[i], r = right[j];
+        await new Promise(resolve => {
+          leftBtn.innerHTML = `<img src="${photos[l]}" alt="${l}"><div>${displayNames[l]}</div>`;
+          rightBtn.innerHTML = `<img src="${photos[r]}" alt="${r}"><div>${displayNames[r]}</div>`;
+
+          const pick = choice => {
+            if (choice === 'left') {
+              result.push(l);
+              i++;
+            } else {
+              result.push(r);
+              j++;
+            }
+            comparisons++;
+            updateProgress();
+            resolve();
+          };
+
+          leftBtn.onclick = () => pick('left');
+          rightBtn.onclick = () => pick('right');
+        });
       }
-      const [left, right] = allPairs[currentIndex];
-      leftBtn.innerHTML = `<img src="${photos[left]}" alt="${left}"><div>${displayNames[left]}</div>`;
-      rightBtn.innerHTML = `<img src="${photos[right]}" alt="${right}"><div>${displayNames[right]}</div>`;
+      return [...result, ...left.slice(i), ...right.slice(j)];
     }
 
-    function vote(winner, loser) {
-      scores[winner]++;
-      comparisons.push([winner, loser]);
-      currentIndex++;
-      updateButtons();
+    function updateProgress() {
+      const percent = Math.min(100, comparisons / totalComparisons * 100);
+      progressBar.style.width = percent + "%";
+      statusText.textContent = `比較進度：${comparisons} / ${totalComparisons}`;
     }
 
-    leftBtn.onclick = () => vote(allPairs[currentIndex][0], allPairs[currentIndex][1]);
-    rightBtn.onclick = () => vote(allPairs[currentIndex][1], allPairs[currentIndex][0]);
+    function displayTop5(sorted) {
+      top5Div.innerHTML = "<h3>前五名：</h3>" + sorted.slice(0, 5).map(name => `
+        <div>
+          <img src="${photos[name]}" alt="${name}" />
+          <div style="text-align:center; font-weight:bold;">${displayNames[name]}</div>
+        </div>
+      `).join("");
+    }
 
-    updateButtons();
+    restartBtn.onclick = () => location.reload();
+
+    (async () => {
+      const sorted = await mergeSort(members);
+      document.querySelector(".pair").style.display = "none";
+      document.querySelector(".progress").style.display = "none";
+      statusText.textContent = "排序完成！";
+      rankingEl.innerHTML = sorted.map(name => `<li>${displayNames[name]}</li>`).join("");
+      displayTop5(sorted);
+      restartBtn.style.display = "inline-block";
+    })();
   </script>
 </body>
 </html>
