@@ -124,7 +124,37 @@
       San: "崔傘 (San)", Mingi: "宋旼琦 (Mingi)", Wooyoung: "鄭友榮 (Wooyoung)", Jongho: "崔鍾浩 (Jongho)"
     };
 
-    const photos = Object.fromEntries(members.map(m => [m, `https://i.postimg.cc/placeholder/${m}.jpg`]));
+    const photos = {
+      S.Coups: "https://i.postimg.cc/8cYmbpt6/SVT.jpg",
+      Jeonghan: "https://i.postimg.cc/h4yqB9mJ/SVT.jpg",
+      Joshua: "https://i.postimg.cc/zGWmK6cW/SVT.jpg",
+      Jun: "https://i.postimg.cc/j2FV4bT6/SVT.jpg",
+      Hoshi: "https://i.postimg.cc/L4Nm8cc8/SVT.jpg",
+      Wonwoo: "https://i.postimg.cc/RVWxVN1g/SVT.jpg",
+      Woozi: "https://i.postimg.cc/jdB0WtZt/SVT.jpg",
+      DK: "https://i.postimg.cc/fTgGDGVt/SVT.jpg",
+      Mingyu: "https://i.postimg.cc/dV49qxPr/SVT.jpg",
+      The8: "https://i.postimg.cc/nzNFhJ5f/SVT.jpg",
+      Seungkwan: "https://i.postimg.cc/ZRXffP09/SVT.jpg",
+      Vernon: "https://i.postimg.cc/3wByBxVF/SVT.jpg",
+      Dino: "https://i.postimg.cc/GmvZfRch/SVT.jpg",
+      BangChan: "https://i.postimg.cc/kG1CYSQb/SKZ.jpg",
+      LeeKnow: "https://i.postimg.cc/90FVBb72/SKZ.jpg",
+      Changbin: "https://i.postimg.cc/ydTs9tWn/SKZ.jpg",
+      Hyunjin: "https://i.postimg.cc/W3jm4FQC/SKZ.jpg",
+      Han: "https://i.postimg.cc/q7vVjsRW/SKZ.jpg",
+      Felix: "https://i.postimg.cc/MTwznqZv/SKZ.jpg",
+      Seungmin: "https://i.postimg.cc/brzYB84K/SKZ.jpg",
+      IN: "https://i.postimg.cc/x8tjrh2q/SKZ-IN.jpg",
+      Hongjoong: "https://i.postimg.cc/85gzLL4k/ATZ.jpg",
+      Seonghwa: "https://i.postimg.cc/qRcMwgDs/ATZ.jpg",
+      Yunho: "https://i.postimg.cc/L87X6cZ1/ATZ.jpg",
+      Yeosang: "https://i.postimg.cc/GhCvby1C/ATZ.jpg",
+      San: "https://i.postimg.cc/y69FqTtj/ATZ.jpg",
+      Mingi: "https://i.postimg.cc/9QXT7HMg/ATZ.jpg",
+      Wooyoung: "https://i.postimg.cc/4NQVyxJh/ATZ.jpg",
+      Jongho: "https://i.postimg.cc/PJmZmtY9/ATZ.jpg"
+    };
 
     const leftBtn = document.getElementById("leftBtn");
     const rightBtn = document.getElementById("rightBtn");
@@ -135,19 +165,49 @@
     const restartBtn = document.getElementById("restartBtn");
 
     let comparisons = 0;
-    let totalComparisons = 0;
-    let stack = [];
-    let result = [];
+    const totalComparisons = Math.ceil(members.length * Math.log2(members.length));
+
+    async function mergeSort(arr) {
+      if (arr.length <= 1) return arr;
+      const mid = Math.floor(arr.length / 2);
+      const left = await mergeSort(arr.slice(0, mid));
+      const right = await mergeSort(arr.slice(mid));
+      return await merge(left, right);
+    }
+
+    async function merge(left, right) {
+      let result = [];
+      let i = 0, j = 0;
+      while (i < left.length && j < right.length) {
+        const l = left[i], r = right[j];
+        await new Promise(resolve => {
+          leftBtn.innerHTML = `<img src="${photos[l]}" alt="${l}"><div>${displayNames[l]}</div>`;
+          rightBtn.innerHTML = `<img src="${photos[r]}" alt="${r}"><div>${displayNames[r]}</div>`;
+
+          const pick = choice => {
+            if (choice === 'left') {
+              result.push(l);
+              i++;
+            } else {
+              result.push(r);
+              j++;
+            }
+            comparisons++;
+            updateProgress();
+            resolve();
+          };
+
+          leftBtn.onclick = () => pick('left');
+          rightBtn.onclick = () => pick('right');
+        });
+      }
+      return [...result, ...left.slice(i), ...right.slice(j)];
+    }
 
     function updateProgress() {
       const percent = Math.min(100, comparisons / totalComparisons * 100);
       progressBar.style.width = percent + "%";
       statusText.textContent = `比較進度：${comparisons} / ${totalComparisons}`;
-    }
-
-    function displayPair([l, r]) {
-      leftBtn.innerHTML = `<img src="${photos[l]}" alt="${l}"><div>${displayNames[l]}</div>`;
-      rightBtn.innerHTML = `<img src="${photos[r]}" alt="${r}"><div>${displayNames[r]}</div>`;
     }
 
     function displayTop5(sorted) {
@@ -159,68 +219,17 @@
       `).join("");
     }
 
-    function mergeSortSetup(arr) {
-      function helper(arr) {
-        if (arr.length <= 1) return arr;
-        const mid = Math.floor(arr.length / 2);
-        const left = helper(arr.slice(0, mid));
-        const right = helper(arr.slice(mid));
-        stack.push({ left, right, i: 0, j: 0, merged: [] });
-        return [...left, ...right];
-      }
-      helper(arr);
-      totalComparisons = stack.length;
-    }
-
-    function step() {
-      if (stack.length === 0) {
-        document.querySelector(".pair").style.display = "none";
-        document.querySelector(".progress").style.display = "none";
-        statusText.textContent = "排序完成！";
-        rankingEl.innerHTML = result.map(name => `<li>${displayNames[name]}</li>`).join("");
-        displayTop5(result);
-        restartBtn.style.display = "inline-block";
-        return;
-      }
-
-      const current = stack[0];
-      const l = current.left[current.i];
-      const r = current.right[current.j];
-
-      displayPair([l, r]);
-
-      leftBtn.onclick = () => pick('left');
-      rightBtn.onclick = () => pick('right');
-
-      function pick(choice) {
-        if (choice === 'left') {
-          current.merged.push(l);
-          current.i++;
-        } else {
-          current.merged.push(r);
-          current.j++;
-        }
-        comparisons++;
-        updateProgress();
-
-        if (current.i >= current.left.length) {
-          current.merged = [...current.merged, ...current.right.slice(current.j)];
-          result = current.merged;
-          stack.shift();
-        } else if (current.j >= current.right.length) {
-          current.merged = [...current.merged, ...current.left.slice(current.i)];
-          result = current.merged;
-          stack.shift();
-        }
-        step();
-      }
-    }
-
     restartBtn.onclick = () => location.reload();
 
-    mergeSortSetup(members);
-    result = members.slice();
-    step();
+    (async () => {
+      const sorted = await mergeSort(members);
+      document.querySelector(".pair").style.display = "none";
+      document.querySelector(".progress").style.display = "none";
+      statusText.textContent = "排序完成！";
+      rankingEl.innerHTML = sorted.map(name => `<li>${displayNames[name]}</li>`).join("");
+      displayTop5(sorted);
+      restartBtn.style.display = "inline-block";
+    })();
   </script>
 </body>
 </html>
