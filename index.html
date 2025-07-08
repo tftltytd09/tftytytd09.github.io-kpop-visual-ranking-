@@ -44,43 +44,35 @@
     .results {
       margin-top: 2rem;
     }
-    .progress {
-      width: 100%;
-      max-width: 400px;
-      height: 20px;
-      background-color: #eee;
-      border-radius: 10px;
-      overflow: hidden;
+    #top5 {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
       margin-top: 1rem;
     }
-    .progress-bar {
-      height: 100%;
-      background-color: #4caf50;
-      width: 0%;
-    }
-    #statusText {
-      margin-top: 0.5rem;
-      font-size: 1rem;
-      font-weight: bold;
+    #top5 img {
+      width: 120px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-  <h1>K-Pop 外貌喜好排名（Merge Sort 模式）</h1>
+  <h1>K-Pop 外貌喜好排名</h1>
   <div id="app">
     <div class="pair">
       <button id="leftBtn"></button>
       <button id="rightBtn"></button>
     </div>
-    <div class="progress">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
-    <div id="statusText">比較進行中...</div>
     <div class="results">
-      <h2>最終排名：</h2>
+      <h2>目前排名：</h2>
       <ol id="ranking"></ol>
+      <div id="top5"></div>
     </div>
   </div>
+
   <script>
     const members = [
       "S.Coups", "Jeonghan", "Joshua", "Jun", "Hoshi", "Wonwoo", "Woozi", "DK", "Mingyu", "The8", "Seungkwan", "Vernon", "Dino",
@@ -133,59 +125,46 @@
     const leftBtn = document.getElementById("leftBtn");
     const rightBtn = document.getElementById("rightBtn");
     const rankingEl = document.getElementById("ranking");
-    const progressBar = document.getElementById("progressBar");
-    const statusText = document.getElementById("statusText");
+    const top5Div = document.getElementById("top5");
 
-    let comparisons = 0;
-    const totalComparisons = Math.ceil(members.length * Math.log2(members.length));
+    let currentIndex = 0;
+    let scores = Object.fromEntries(members.map(m => [m, 0]));
 
-    async function mergeSort(arr) {
-      if (arr.length <= 1) return arr;
-      const mid = Math.floor(arr.length / 2);
-      const left = await mergeSort(arr.slice(0, mid));
-      const right = await mergeSort(arr.slice(mid));
-      return await merge(left, right);
-    }
+    function showNextPair() {
+      if (currentIndex >= members.length * (members.length - 1) / 2) {
+        const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+        rankingEl.innerHTML = sorted.map(([name]) => `<li>${displayNames[name]}</li>`).join("");
 
-    async function merge(left, right) {
-      let result = [], i = 0, j = 0;
-      while (i < left.length && j < right.length) {
-        const l = left[i], r = right[j];
-        await new Promise(resolve => {
-          leftBtn.innerHTML = `<img src="${photos[l]}" alt="${l}"><div>${displayNames[l]}</div>`;
-          rightBtn.innerHTML = `<img src="${photos[r]}" alt="${r}"><div>${displayNames[r]}</div>`;
+        top5Div.innerHTML = sorted.slice(0, 5).map(([name]) => `
+          <div>
+            <img src="${photos[name]}" alt="${name}" />
+            <div style="text-align:center; font-weight:bold;">${displayNames[name]}</div>
+          </div>
+        `).join("");
 
-          const pick = side => {
-            if (side === 'left') {
-              result.push(l); i++;
-            } else {
-              result.push(r); j++;
-            }
-            comparisons++;
-            updateProgress();
-            resolve();
-          };
-
-          leftBtn.onclick = () => pick('left');
-          rightBtn.onclick = () => pick('right');
-        });
+        document.querySelector(".pair").style.display = "none";
+        return;
       }
-      return [...result, ...left.slice(i), ...right.slice(j)];
+
+      let i = 0, j = 0, count = 0;
+      outer: for (i = 0; i < members.length; i++) {
+        for (j = i + 1; j < members.length; j++) {
+          if (count === currentIndex) break outer;
+          count++;
+        }
+      }
+
+      const left = members[i];
+      const right = members[j];
+
+      leftBtn.innerHTML = `<img src="${photos[left]}" alt="${left}"><div>${displayNames[left]}</div>`;
+      rightBtn.innerHTML = `<img src="${photos[right]}" alt="${right}"><div>${displayNames[right]}</div>`;
+
+      leftBtn.onclick = () => { scores[left]++; currentIndex++; showNextPair(); };
+      rightBtn.onclick = () => { scores[right]++; currentIndex++; showNextPair(); };
     }
 
-    function updateProgress() {
-      const percent = Math.min(100, comparisons / totalComparisons * 100);
-      progressBar.style.width = percent + "%";
-      statusText.textContent = `比較進度：${comparisons} / ${totalComparisons}`;
-    }
-
-    (async () => {
-      const sorted = await mergeSort(members);
-      document.querySelector(".pair").style.display = "none";
-      document.querySelector(".progress").style.display = "none";
-      statusText.textContent = "排序完成！";
-      rankingEl.innerHTML = sorted.map(name => `<li>${displayNames[name]}</li>`).join("");
-    })();
+    showNextPair();
   </script>
 </body>
 </html>
