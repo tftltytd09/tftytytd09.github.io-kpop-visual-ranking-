@@ -134,14 +134,12 @@
       if (currentIndex >= members.length * (members.length - 1) / 2) {
         const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
         rankingEl.innerHTML = sorted.map(([name]) => `<li>${displayNames[name]}</li>`).join("");
-
         top5Div.innerHTML = sorted.slice(0, 5).map(([name]) => `
           <div>
             <img src="${photos[name]}" alt="${name}" />
             <div style="text-align:center; font-weight:bold;">${displayNames[name]}</div>
           </div>
         `).join("");
-
         document.querySelector(".pair").style.display = "none";
         return;
       }
